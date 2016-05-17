@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+          <div class="page-title">
+            <div class="title_left">
+              <h3>Create Claim</h3>
+            </div>
+          </div>
+          <div class="clearfix"></div>
+          <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <div class="x_panel">
+                <div class="x_title">
+                  <h2>Expense Form</h2>
+                  <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                  <br />
+                  <form data-parsley-validate class="form-horizontal form-label-left">
+
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="employee-name">Employee Name
+                      </label>
+                      <div class="col-md-6 col-sm-6 col-xs-12">
+                        <input type="text" name="employee-name" class="form-control col-md-7 col-xs-12"
+                          disabled="disabled" value="{{ empdetail['fullname'] }}">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="employee-id">Employee ID
+                      </label>
+                      <div class="col-md-6 col-sm-6 col-xs-12">
+                        <input type="text" name="employee-id" class="form-control col-md-7 col-xs-12"
+                          disabled="disabled" value="{{ empdetail['jawdat_id'] }}">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="supervisor-name">Supervisor Name
+                      </label>
+                      <div class="col-md-6 col-sm-6 col-xs-12">
+                        <input type="text" name="supervisor-name" class="form-control col-md-7 col-xs-12"
+                          disabled="disabled" value="{{ supdetail['fullname'] }}">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Expense Period
+                      </label>
+                      <div class="col-md-6 col-sm-6 col-xs-12">
+                        <select name="expense-period" class="form-control" required="required">
+                          <option value="">Choose..</option>
+                          <option value="0416">21 Maret 2016 - 20 April 2016</option>
+                          <option value="0516">21 April 2016 - 20 Mei 2016</option>
+                          <option value="0616">21 Mei 2016 - 20 Juni 2016</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="ln_solid"></div>
+
+                    <div id="expense-dynamic-field">
+                      <div class="form-group">
+                          <div class="col-xs-2">
+                              <input type="text" class="form-control date" name="expense[0].date" placeholder="Date" />
+                          </div>
+                          <div class="col-xs-4">
+                              <input type="text" class="form-control" name="expense[0].description" placeholder="Description" />
+                          </div>
+                          <div class="col-xs-2">
+                              <select class="form-control selectpicker" data-live-search="true" name="expense[0].category" title="Pick a category">
+                                  <option value="transport">Transport</option>
+                                  <option value="meal">Meal</option>
+                                  <option value="telecommunication">Telecommunication</option>
+                                  <option value="internet">Internet</option>
+                                  <option value="parking">Parking</option>
+                                  <option value="gasoline">Gasoline</option>
+                                  <option value="tollroad">Toll Road</option>
+                                  <option value="training">Training</option>
+                                  <option value="exam">Exam</option>
+                                  <option value="other">Other</option>
+                              </select>
+                          </div>
+                          <div class="col-xs-2">
+                              <input type="text" class="form-control currency" data-thousands="." data-prefix="Rp " data-precision="0" name="expense[0].cost" placeholder="Cost"/>
+                          </div>
+                          <div class="col-xs-1">
+                              <button type="button" class="btn btn-default addButton"><i class="fa fa-plus"></i></button>
+                          </div>
+                      </div>
+
+                      <!-- The template for adding new field -->
+                      <div class="form-group hide" id="expenseTemplate">
+                          <div class="col-xs-2">
+                              <input type="text" class="form-control date" name="date" placeholder="Date" />
+                          </div>
+                          <div class="col-xs-4">
+                              <input type="text" class="form-control" name="description" placeholder="Description" />
+                          </div>
+                          <div class="col-xs-2">
+                              <select class="form-control selectpicker" data-live-search="true" name="category" title="Pick a category">
+                                  <option value="transport">Transport</option>
+                                  <option value="meal">Meal</option>
+                                  <option value="telecommunication">Telecommunication</option>
+                                  <option value="internet">Internet</option>
+                                  <option value="parking">Parking</option>
+                                  <option value="gasoline">Gasoline</option>
+                                  <option value="tollroad">Toll Road</option>
+                                  <option value="training">Training</option>
+                                  <option value="exam">Exam</option>
+                                  <option value="other">Other</option>
+                              </select>
+                          </div>
+                          <div class="col-xs-2">
+                              <input type="text" class="form-control currency" data-thousands="." data-prefix="Rp " data-precision="0" name="cost" placeholder="Cost"/>
+                          </div>
+                          <div class="col-xs-1">
+                              <button type="button" class="btn btn-default removeButton"><i class="fa fa-minus"></i></button>
+                          </div>
+                      </div>
+                    </div>
+
+                    <div class="ln_solid"></div>
+                    <div class="form-group">
+                      <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                        <button type="submit" class="btn btn-primary">Cancel</button>
+                        <button type="submit" class="btn btn-success">Submit</button>
+                      </div>
+                    </div>
+
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+{% endblock %}
+
+{% block script %}
+
+<!-- daterangepicker -->
+<script type="text/javascript" src="{{ url_for('static', filename='js/moment/moment.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/datepicker/daterangepicker.js') }}"></script>
+
+<!-- jquery-maskmoney -->
+<script type="text/javascript" src="{{ url_for('static', filename='vendors/jquery-maskmoney/jquery.maskMoney.min.js') }}"></script>
+
+<script>
+$(document).ready(function() {
+    var expenseIndex = 0;
+
+    $('#expense-dynamic-field')
+        // Add button click handler
+        .on('click', '.addButton', function() {
+
+            expenseIndex++;
+            var $template = $('#expenseTemplate'),
+                $clone    = $template
+                                .clone()
+                                .removeClass('hide')
+                                .removeAttr('id')
+                                .attr('data-expense-index', expenseIndex)
+                                .insertBefore($template);
+
+            // Update the name attributes
+            $clone
+                .find('[name="date"]').attr('name', 'expense[' + expenseIndex + '].date').end()
+                .find('[name="description"]').attr('name', 'expense[' + expenseIndex + '].description').end()
+                .find('[name="category"]').attr('name', 'expense[' + expenseIndex + '].category').end()
+                .find('[name="cost"]').attr('name', 'expense[' + expenseIndex + '].cost').end();
+            $clone
+                .find('.bootstrap-select').replaceWith(function() { return $('select', this); });
+
+            $('input.date').daterangepicker({
+                format: 'DD/MM/YYYY',
+                singleDatePicker: true,
+                calender_style: "picker_4"
+            }, function(start, end, label) {
+                // console.log(start.toISOString(), end.toISOString(), label);
+            });
+
+            $(function() {
+              $('.currency').maskMoney();
+            });
+
+            $(".selectpicker").selectpicker('refresh');
+        })
+
+        // Remove button click handler
+        .on('click', '.removeButton', function() {
+            var $row  = $(this).parents('.form-group'),
+                index = $row.attr('data-expense-index');
+
+            // Remove element containing the fields
+            $row.remove();
+        });
+});
+
+$('input.date').daterangepicker({
+    format: 'DD/MM/YYYY',
+    singleDatePicker: true,
+    calender_style: "picker_4"
+}, function(start, end, label) {
+    // console.log(start.toISOString(), end.toISOString(), label);
+});
+
+$(function() {
+  $('.currency').maskMoney();
+});
+
+</script>
+
+{% endblock %}

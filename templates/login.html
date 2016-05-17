@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Jawdat Internal Applications</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" />
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/bootstrap/dist/css/bootstrap.min.css') }}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/font-awesome/css/font-awesome.min.css') }}">
+
+    <!-- Custom Theme Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  </head>
+
+  <body style="background:#F7F7F7;">
+    <div class="">
+
+      <div id="wrapper">
+        <div id="login" class="form">
+          <section class="login_content">
+              <h1>Login Form</h1>
+              <div>
+                <a href="{{ g_url }}">
+                  <img src="{{ url_for('static', filename='images/google_signin.png') }}" alt="Google Sign In" />
+                </a>
+              </div>
+              <div class="clearfix"></div>
+              <div class="separator">
+                <div class="clearfix"></div>
+                <br />
+                <div>
+                  <h1><i class="fa fa-paper-plane" style="font-size: 26px;"></i> Jawdat Internal Applications</h1>
+                  <p>©2016 Jawdat Teknologi Indonesia</p>
+                </div>
+              </div>
+          </section>
+        </div>
+
+      </div>
+    </div>
+  </body>
+</html>
