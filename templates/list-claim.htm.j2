@@ -27,6 +27,7 @@
                       <thead>
                         <tr>
                           <th>Date</th>
+                          <th>Name</th>
                           <th>Period</th>
                           <th>Total</th>
                           <th>Detail</th>
@@ -39,6 +40,7 @@
                         {% for claim in claim_list: %}
                         <tr id="row{{ claim["_id"] }}">
                           <td >{{ claim["date_submitted"].strftime("%d/%m/%y") }}</td>
+                          <td >{{ claim["fullname"] }}</td>
                           <td>{{ convert_period_to_text(claim["period"]) }}</td>
                           <td>{{ format_currency(claim["total"]) }}</td>
                           <td>
