@@ -67,7 +67,24 @@
                 <ul class="nav side-menu">
                   <li><a><i class="fa fa-calculator"></i> Reimbursement <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
+                      <li><a href="{{ url_for('list_claim') }}">List Claim</a>
+                      </li>
                       <li><a href="{{ url_for('create_claim') }}">Create Claim</a>
+                      </li>
+                      <li><a href="{{ url_for('verify_claim') }}">Verify Claim</a>
+                      </li>
+                      <li><a href="{{ url_for('approve_claim') }}">Approve Claim</a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+
+                <ul class="nav side-menu">
+                  <li><a><i class="fa fa-university"></i> Cost Center <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="{{ url_for('list_costcenter') }}">List Cost Center</a>
+                      </li>
+                      <li><a href="{{ url_for('create_costcenter') }}">Create Cost Center</a>
                       </li>
                     </ul>
                   </li>
@@ -77,22 +94,6 @@
             </div>
             <!-- /sidebar menu -->
 
-            <!-- /menu footer buttons -->
-            <div class="sidebar-footer hidden-small">
-              <a data-toggle="tooltip" data-placement="top" title="Settings">
-                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-              </a>
-              <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-                <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
-              </a>
-              <a data-toggle="tooltip" data-placement="top" title="Lock">
-                <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-              </a>
-              <a data-toggle="tooltip" data-placement="top" title="Logout">
-                <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-              </a>
-            </div>
-            <!-- /menu footer buttons -->
           </div>
         </div>
 

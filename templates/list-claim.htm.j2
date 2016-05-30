@@ -1,0 +1,185 @@
+{% extends "base.htm.j2" %}
+
+{% block style %}
+    <!-- PNotify -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/pnotify/dist/pnotify.css') }}">
+{% endblock %}
+
+{% block content %}
+
+          <div class="page-title">
+            <div class="title_left">
+              <h3>Claim List</h3>
+            </div>
+          </div>
+          <div class="clearfix"></div>
+          <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <div class="x_panel">
+                <div class="x_title">
+                  <h2>Status</h2>
+                  <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                  <div class="col-md-12 col-sm-12 col-xs-12">
+                    {% if claim_list.count() > 0: %}
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Period</th>
+                          <th>Total</th>
+                          <th>Detail</th>
+                          <th>Status</th>
+                          <th>Note</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for claim in claim_list: %}
+                        <tr id="row{{ claim["_id"] }}">
+                          <td >{{ claim["date_submitted"].strftime("%d/%m/%y") }}</td>
+                          <td>{{ convert_period_to_text(claim["period"]) }}</td>
+                          <td>{{ format_currency(claim["total"]) }}</td>
+                          <td>
+                            <button class="btn btn-xs btn-secondary btn-show-detail" data-claimid="{{ claim["_id"] }}">Show</button>
+                          </td>
+                          <td >{{ claim["status"].capitalize() }}</td>
+                          <td>
+                          {% if claim["status"] == "approved": %}
+                            Approved on {{ claim["approval_date"].strftime("%d/%m/%y") }}
+                          {% elif claim["status"] == "rejected": %}
+                            {{ claim["reject_msg"] }}
+                          {% else: %}
+                            -
+                          {% endif %}
+                          </td>
+                          <td>
+                            <button class="btn btn-xs btn-danger btn-cancel-claim" data-toggle="modal" data-target=".modal-confirm-cancel" data-claimid="{{ claim["_id"] }}">Cancel</button>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% else: %}
+                      <p><i>No expense claim is available.</i></p>
+                    {% endif %}
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Small modal -->
+          <div class="modal fade modal-confirm-cancel" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span>
+                  </button>
+                  <h4 class="modal-title">Claim Cancellation</h4>
+                </div>
+                <div class="modal-body">
+                  <p>Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-danger btn-sm btn-confirm-cancel">Cancel</button>
+                  <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <!-- /modals -->
+
+          <!-- Large modal -->
+          <div class="modal fade modal-show-detail" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+                  </button>
+                  <h4 class="modal-title">Expense Form</h4>
+                </div>
+                <div class="modal-body" id="modal-show-detail-body">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <!-- /modals -->
+
+{% endblock %}
+
+{% block script %}
+    <!-- PNotify -->
+    <script src="{{ url_for('static', filename='vendors/pnotify/dist/pnotify.js') }}"></script>
+    <script>
+
+$('.btn-show-detail').unbind().on('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  var claim_id = $(this).data('claimid');
+  $.ajax({
+    url: '/view_detail_claim/' + claim_id,
+    method: 'GET',
+    success: function(response) {
+      $('#modal-show-detail-body').html(response);
+      $('.modal-show-detail').modal('show');
+    },
+    error: function(xhr, status, error) {
+      new PNotify({
+        title: 'Error',
+        text: 'Something went wrong',
+        type: 'error',
+        styling: 'bootstrap3'
+      });
+    },
+    complete: function() {
+    }
+  });
+});
+
+$('.btn-cancel-claim').unbind().on('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  var claim_id = $(this).data('claimid');
+  $('.modal-confirm-cancel').modal('show');
+  $('.btn-confirm-cancel').unbind().on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $.ajax({
+      url: '/delete_claim/' + claim_id,
+      method: 'GET',
+      success: function(response) {
+        $('#row' + claim_id).remove();
+        new PNotify({
+          title: 'Success',
+          text: 'Claim is cancelled',
+          type: 'success',
+          styling: 'bootstrap3'
+        });
+      },
+      error: function(xhr, status, error) {
+        new PNotify({
+          title: 'Error',
+          text: 'Something went wrong',
+          type: 'error',
+          styling: 'bootstrap3'
+        });
+      },
+      complete: function() {
+        $('.modal-confirm-cancel').modal('hide');
+      }
+    });
+  });
+});
+
+    </script>
+{% endblock %}

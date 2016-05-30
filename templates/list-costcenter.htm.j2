@@ -1,0 +1,128 @@
+{% extends "base.htm.j2" %}
+
+{% block style %}
+    <!-- PNotify -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendors/pnotify/dist/pnotify.css') }}">
+{% endblock %}
+
+{% block content %}
+
+          <div class="page-title">
+            <div class="title_left">
+              <h3>Cost Center List</h3>
+            </div>
+          </div>
+          <div class="clearfix"></div>
+          <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <div class="x_panel">
+                <div class="x_title">
+                  <h2>Cost Center</h2>
+                  <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                  <div class="col-md-12 col-sm-12 col-xs-12">
+                    {% if cc_list|length > 0: %}
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Name</th>
+                          <th>Status</th>
+                          <th>Total Expense</th>
+                          <th>Budget</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for cc in cc_list: %}
+                        <tr id="row{{ cc["_id"] }}">
+                          <td >{{ cc["costcenter_id"] }}</td>
+                          <td>{{ cc["costcenter_name"] }}</td>
+                          <td class="cc-status">{{ cc["costcenter_status"].capitalize() }}</td>
+                          <td>{{ format_currency(cc_total_expense[cc["costcenter_id"]]) }}</td>
+                          <td>{{ format_currency(cc["costcenter_budget"]) }}</td>
+                          <td>
+                            <button class="btn btn-xs btn-warning btn-cc-close" {% if cc["costcenter_id"] == 'opex' %}disabled="disabled" {% endif %}data-ccid="{{ cc["_id"] }}">Close</button>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% else: %}
+                      <p><i>No cost center is available.</i></p>
+                    {% endif %}
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Small modal -->
+          <div class="modal fade modal-confirm-close" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span>
+                  </button>
+                  <h4 class="modal-title">Cost Center Closing</h4>
+                </div>
+                <div class="modal-body">
+                  <p>Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary btn-sm btn-confirm-close">Confirm</button>
+                  <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <!-- /modals -->
+
+{% endblock %}
+
+{% block script %}
+    <!-- PNotify -->
+    <script src="{{ url_for('static', filename='vendors/pnotify/dist/pnotify.js') }}"></script>
+    <script>
+
+$('.btn-cc-close').unbind().on('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  var cc_id = $(this).data('ccid');
+  $('.modal-confirm-close').modal('show');
+  $('.btn-confirm-close').unbind().on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $.ajax({
+      url: '/close_costcenter/' + cc_id,
+      method: 'GET',
+      success: function(response) {
+        $('#row' + cc_id).find('.cc-status').html('Closed');
+        new PNotify({
+          title: 'Success',
+          text: 'Cost center is closed',
+          type: 'success',
+          styling: 'bootstrap3'
+        });
+      },
+      error: function(xhr, status, error) {
+        new PNotify({
+          title: 'Error',
+          text: 'Something went wrong',
+          type: 'error',
+          styling: 'bootstrap3'
+        });
+      },
+      complete: function() {
+        $('.modal-confirm-close').modal('hide');
+      }
+    });
+  });
+});
+
+    </script>
+{% endblock %}
