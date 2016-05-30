@@ -62,8 +62,8 @@ def send_mail(recipient_list, subject, mail_text, mailer_from="JBot Expense Clai
     print "Sending email to %s" % new["To"]
 
     try:
-        # smtph.sendmail(new["From"], rec_addr_list, new.as_string())
-        print new
+        smtph.sendmail(new["From"], rec_addr_list, new.as_string())
+        # print new
     except:
         print "Sending mail to %s failed..." % recpt_to_string
 
@@ -501,11 +501,13 @@ def list_costcenter():
         total_expense = 0
         for claim in claim_list:
             for exp in claim["expense_list"]:
-                total_expense += exp["cost"]
+                if exp["costcenter"] == cc["costcenter_id"]:
+                    total_expense += exp["cost"]
         cc_total_expense[cc["costcenter_id"]] = total_expense
 
     return render_template('list-costcenter.htm.j2', fullname=session['fullname'],
-        username=session['username'], profpic=session['profpic'], roles=session['roles'], cc_list=cc_list, cc_total_expense=cc_total_expense)
+        username=session['username'], profpic=session['profpic'], roles=session['roles'],
+        cc_list=cc_list, cc_total_expense=cc_total_expense)
 
 @app.route('/create_costcenter', methods=['GET', 'POST'])
 @logged_in
