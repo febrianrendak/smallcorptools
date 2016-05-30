@@ -79,6 +79,10 @@
                       <li><a href="{{ url_for('approve_claim') }}">Approve Claim</a>
                       </li>
                       {% endif %}
+                      {% if "admin" in roles or "manager" in roles or "accounting" in roles: %}
+                      <li><a href="{{ url_for('list_all_claim') }}">List All Claim</a>
+                      </li>
+                      {% endif %}
                     </ul>
                   </li>
                 </ul>

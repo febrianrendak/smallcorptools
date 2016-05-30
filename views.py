@@ -367,6 +367,15 @@ def list_claim():
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
 
+@app.route('/list_all_claim')
+@logged_in
+def list_all_claim():
+    rch = dbh.reimburse_claims
+    claim_list = rch.find()
+
+    return render_template('list-claim.htm.j2', fullname=session['fullname'],
+        username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
+
 @app.route('/delete_claim/<claim_id>')
 @logged_in
 def delete_claim(claim_id):
