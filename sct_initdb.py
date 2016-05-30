@@ -1,7 +1,9 @@
 #!/usr/bin/python
+# by: Mohammad Riftadi <riftadi@jawdat.com>
 # Testing Database instance for CPE Manager
 
 from pymongo import MongoClient
+import hashlib
 
 client = MongoClient('mongodb://localhost:27017/')
 dbh = client.jawdat_internal
@@ -13,32 +15,74 @@ eh = dbh.employees
 ne = [
       {
           "username" : "riftadi@jawdat.com",
+          "secret" : hashlib.md5("jawdat123").hexdigest(),
           "jawdat_id" : "012",
-          "role" : ["staff"],
+          "roles" : ["staff", "admin"],
           "fullname" : "Mohammad Riftadi",
           "position" : "Solutions Manager",
-          "division" : "presales",
+          "division" : "solutions",
           "supervisor" : "tedhi@jawdat.com",
+          "profpic" : "riftadi.jpg",
       },
 
       {
           "username" : "tedhi@jawdat.com",
+          "secret" : hashlib.md5("jawdat123").hexdigest(),
           "jawdat_id" : "001",
-          "role" : ["manager"],
+          "roles" : ["manager", "director"],
           "fullname" : "Tedhi Achdiana",
           "position" : "Managing Director",
           "division" : "bod",
           "supervisor" : "tedhi@jawdat.com",
+          "profpic" : "tedhi.jpg",
+      },
+
+      {
+          "username" : "himawan@jawdat.com",
+          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "jawdat_id" : "002",
+          "roles" : ["manager", "director"],
+          "fullname" : "Himawan Nugroho",
+          "position" : "CEO",
+          "division" : "bod",
+          "supervisor" : "himawan@jawdat.com",
+          "profpic" : "himawan.jpg",
       },
 
       {
           "username" : "afilia@jawdat.com",
+          "secret" : hashlib.md5("jawdat123").hexdigest(),
           "jawdat_id" : "004",
-          "role" : ["accounting"],
+          "roles" : ["accounting", "hrd"],
           "fullname" : "Afilia Ratna",
-          "position" : "Managing Director",
+          "position" : "HRD Manager",
           "division" : "bod",
           "supervisor" : "tedhi@jawdat.com",
+          "profpic" : "afilia.jpg",
+      },
+
+      {
+          "username" : "ericson@jawdat.com",
+          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "jawdat_id" : "016",
+          "roles" : ["staff"],
+          "fullname" : "Ericson Ferdinand P.",
+          "position" : "Engineering Manager",
+          "division" : "engineering",
+          "supervisor" : "tedhi@jawdat.com",
+          "profpic" : "ericson.jpg",
+      },
+
+      {
+          "username" : "tri.karamoy@jawdat.com",
+          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "jawdat_id" : "024",
+          "roles" : ["staff"],
+          "fullname" : "Tri Primandra Karamoy",
+          "position" : "Product Manager",
+          "division" : "solutions",
+          "supervisor" : "tedhi@jawdat.com",
+          "profpic" : "tri.karamoy.jpg",
       },
 ]
 

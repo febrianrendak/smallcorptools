@@ -25,13 +25,18 @@
       <div id="wrapper">
         <div id="login" class="form">
           <section class="login_content">
-            <form method="POST" action="main">
+            <form method="POST">
               <h1>Login Form</h1>
+              {% if msg: %}
+              <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                {{ msg }}
+              </div>
+              {% endif %}
               <div>
-                <input type="text" class="form-control" placeholder="Username" required="" />
+                <input type="text" name="username" class="form-control" placeholder="Username" required="" />
               </div>
               <div>
-                <input type="password" class="form-control" placeholder="Password" required="" />
+                <input type="password" name="password" class="form-control" placeholder="Password" required="" />
               </div>
               <div>
                 <button class="btn btn-default submit">Log in</button>
