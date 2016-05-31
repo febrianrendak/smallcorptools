@@ -57,7 +57,7 @@
                           {% endif %}
                           </td>
                           <td>
-                            <button class="btn btn-xs btn-danger btn-cancel-claim" data-toggle="modal" data-target=".modal-confirm-cancel" data-claimid="{{ claim["_id"] }}">Cancel</button>
+                            <button class="btn btn-xs btn-danger btn-cancel-claim" {% if claim["status"] == "approved" or claim["status"] == "transferred" %}disabled="disabled" {% endif %}data-toggle="modal" data-target=".modal-confirm-cancel" data-claimid="{{ claim["_id"] }}">Cancel</button>
                           </td>
                         </tr>
                         {% endfor %}

@@ -124,6 +124,14 @@ ncc = [
 
 print cch.insert(ncc)
 
+#drop if collections exists
+dbh.drop_collection("settings")
+
+sh = dbh.settings
+ns = { "setting_name" : "mail", "email_notifications" : "off" }
+
+print sh.insert(ns)
+
 rch = dbh.reimburse_claims
 nrc = [
         {

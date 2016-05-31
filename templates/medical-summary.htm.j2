@@ -1,0 +1,49 @@
+{% extends "base.htm.j2" %}
+
+{% block content %}
+
+          <div class="page-title">
+            <div class="title_left">
+              <h3>Medical Summary</h3>
+            </div>
+          </div>
+          <div class="clearfix"></div>
+          <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <div class="x_panel">
+                <div class="x_title">
+                  <h2>Medical Claim</h2>
+                  <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                  <div class="col-md-12 col-sm-12 col-xs-12">
+                    {% if emp_list|length > 0: %}
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Total Expense</th>
+                          <th>Year</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for emp in emp_list: %}
+                        <tr id="row{{ emp["username"] }}">
+                          <td>{{ emp["fullname"] }}</td>
+                          <td>{{ format_currency(emp_medical_expense[emp["username"]]) }}</td>
+                          <td>{{ year }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% else: %}
+                      <p><i>No medical claim is available.</i></p>
+                    {% endif %}
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+{% endblock %}

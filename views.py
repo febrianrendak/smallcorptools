@@ -8,6 +8,8 @@ from flask import Flask, url_for, redirect, request, session, render_template, j
 # from flask_weasyprint import HTML, render_pdf
 from functools import wraps
 from pymongo import MongoClient
+from Queue import Queue
+from threading import Thread
 import email, imaplib, smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -29,47 +31,57 @@ def logged_in(f):
 
     return decorated_function
 
+def process_config_queue(q):
+    while True:
+        recipient_list, subject, mail_text, mailer_from = q.get()
+
+        con_flag = True
+
+        IMAP_SERVER = 'imap.gmail.com'
+        MAIL_USERNAME = 'no-reply@jawdat.com'
+        MAIL_PASSWORD = 'H7sUB3hda8!x92d'
+
+        rec_name_addr_list = []
+        rec_addr_list = []
+        for recipient in recipient_list:
+            rec_name_addr_list.append("%s <%s>" % (recipient["name"], recipient["address"]))
+            rec_addr_list.append(recipient["address"])
+        recpt_to_string = ", ".join(rec_name_addr_list)
+
+        smtph = smtplib.SMTP('smtp.gmail.com:587')
+        #smtph.set_debuglevel(1)
+        smtph.starttls()
+        smtph.login(MAIL_USERNAME, MAIL_PASSWORD)
+
+        new = MIMEMultipart("mixed")
+        body = MIMEMultipart("alternative")
+        msg = mail_text
+        body.attach(MIMEText(msg, "plain"))
+        #body.attach(MIMEText("<html>reply body text</html>", "html"))
+        new.attach(body)
+
+        new["Message-ID"] = email.utils.make_msgid()
+        new["Subject"] = subject
+        new["To"] = recpt_to_string
+        new["From"] = mailer_from
+
+        try:
+            smtph.sendmail(new["From"], rec_addr_list, new.as_string())
+            # print new
+        except:
+            print "Sending mail to %s failed..." % recpt_to_string
+
+        smtph.quit()
+
+        q.task_done()
+
 def send_mail(recipient_list, subject, mail_text, mailer_from="JBot Expense Claim <no-reply@jawdat.com>"):
-    IMAP_SERVER = 'imap.gmail.com'
-    MAIL_USERNAME = 'no-reply@jawdat.com'
-    MAIL_PASSWORD = 'H7sUB3hda8!x92d'
+    cpeq = Queue(maxsize=0)
+    worker = Thread(target=process_config_queue, args=(cpeq,))
+    worker.setDaemon(True)
+    worker.start()
 
-    rec_name_addr_list = []
-    rec_addr_list = []
-    for recipient in recipient_list:
-        rec_name_addr_list.append("%s <%s>" % (recipient["name"], recipient["address"]))
-        rec_addr_list.append(recipient["address"])
-    recpt_to_string = ", ".join(rec_name_addr_list)
-
-    smtph = smtplib.SMTP('smtp.gmail.com:587')
-    #smtph.set_debuglevel(1)
-    smtph.starttls()
-    smtph.login(MAIL_USERNAME, MAIL_PASSWORD)
-
-    new = MIMEMultipart("mixed")
-    body = MIMEMultipart("alternative")
-    msg = mail_text
-    body.attach(MIMEText(msg, "plain"))
-    #body.attach(MIMEText("<html>reply body text</html>", "html"))
-    new.attach(body)
-
-    new["Message-ID"] = email.utils.make_msgid()
-    new["Subject"] = subject
-    new["To"] = recpt_to_string
-    new["From"] = mailer_from
-
-    # The actual mail send
-    print "Sending email to %s" % new["To"]
-
-    try:
-        smtph.sendmail(new["From"], rec_addr_list, new.as_string())
-        # print new
-    except:
-        print "Sending mail to %s failed..." % recpt_to_string
-
-    print "Email sent to %s successfully..." % recpt_to_string
-
-    smtph.quit()
+    cpeq.put([recipient_list, subject, mail_text, mailer_from])
 
 def strip_curr(curr_str):
     return filter(type(curr_str).isdigit, curr_str)
@@ -274,6 +286,8 @@ def confirm_claim():
 def submit_claim():
     f = request.form
     rch = dbh.reimburse_claims
+    sh = dbh.settings
+    settings_dict = sh.find_one()
 
     username = f["employee-email"]
     fullname = f["employee-name"]
@@ -284,13 +298,14 @@ def submit_claim():
         "status" : "presubmitted"}, {"$set" : 
         {"status" : "submitted", "date_submitted" : date_submitted}})
 
-    # send mail to accounting and the claimer
-    recipient_list = [
-        {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
-        {"name": fullname, "address": username},
-    ]
-    subject = "[JBot] Expense Claim Submission"
-    TEMPLATE = '''Dear %s,
+    if settings_dict["email_notifications"] == "on":
+        # send mail to accounting and the claimer
+        recipient_list = [
+            {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
+            {"name": fullname, "address": username},
+        ]
+        subject = "[JBot] Expense Claim Submission"
+        TEMPLATE = '''Dear %s,
 
 %s has submitted an expense claim for period %s.
 Please verify the expense claim.
@@ -298,8 +313,8 @@ Please verify the expense claim.
 On behalf of the claimer,
 Jawdat Expense Reimbursement Bot
 '''
-    mail_text = TEMPLATE % ("Afilia Ratna", fullname, convert_period_to_text(period))
-    send_mail(recipient_list, subject, mail_text)
+        mail_text = TEMPLATE % ("Afilia Ratna", fullname, convert_period_to_text(period))
+        send_mail(recipient_list, subject, mail_text)
     
     return redirect(url_for('list_claim'))
 
@@ -398,27 +413,30 @@ def verify_claim_id(claim_id):
     # check if accounting
     rch = dbh.reimburse_claims
     res = rch.update_one({"_id" : ObjectId(claim_id)}, {"$set" : {"status" : "verified"}})
+    sh = dbh.settings
+    settings_dict = sh.find_one()
 
     claim = rch.find_one({"_id" : ObjectId(claim_id)})
 
-    # send mail to accounting and the claimer
-    recipient_list = [
-        {"name": "Tedhi Achdiana", "address": "tedhi@jawdat.com"},
-        {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
-        {"name": claim["fullname"], "address": claim["username"]},
-    ]
-    subject = "[JBot] Expense Claim Verified"
-    TEMPLATE = '''Dear %s,
+    if settings_dict["email_notifications"] == "on":
+        # send mail to accounting and the claimer
+        recipient_list = [
+            {"name": "Tedhi Achdiana", "address": "tedhi@jawdat.com"},
+            {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
+            {"name": claim["fullname"], "address": claim["username"]},
+        ]
+        subject = "[JBot] Expense Claim Verified"
+        TEMPLATE = '''Dear %s,
 
-%s's expense claim for period %s has been verified by %s.
-Please approve the expense claim.
+    %s's expense claim for period %s has been verified by %s.
+    Please approve the expense claim.
 
-On behalf of the claimer,
-Jawdat Expense Reimbursement Bot
-'''
-    mail_text = TEMPLATE % ("Tedhi Achdiana", claim["fullname"], \
-        convert_period_to_text(claim["period"]), session['fullname'])
-    send_mail(recipient_list, subject, mail_text)
+    On behalf of the claimer,
+    Jawdat Expense Reimbursement Bot
+    '''
+        mail_text = TEMPLATE % ("Tedhi Achdiana", claim["fullname"], \
+            convert_period_to_text(claim["period"]), session['fullname'])
+        send_mail(recipient_list, subject, mail_text)
 
     return jsonify({"verified" : True})
 
@@ -439,26 +457,29 @@ def approve_claim_id(claim_id):
     date_approved = datetime.now()
     res = rch.update_one({"_id" : ObjectId(claim_id)}, {"$set" :
         {"status" : "approved", "approval_date" : date_approved}})
+    sh = dbh.settings
+    settings_dict = sh.find_one()
 
     claim = rch.find_one({"_id" : ObjectId(claim_id)})
 
-    # send mail
-    recipient_list = [
-        {"name": "Tedhi Achdiana", "address": "tedhi@jawdat.com"},
-        {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
-        {"name": claim["fullname"], "address": claim["username"]},
-    ]
-    subject = "[JBot] Expense Claim Approved"
-    TEMPLATE = '''Dear %s,
+    if settings_dict["email_notifications"] == "on":
+        # send mail
+        recipient_list = [
+            {"name": "Tedhi Achdiana", "address": "tedhi@jawdat.com"},
+            {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
+            {"name": claim["fullname"], "address": claim["username"]},
+        ]
+        subject = "[JBot] Expense Claim Approved"
+        TEMPLATE = '''Dear %s,
 
-Your expense claim for period %s has been approved by %s.
+    Your expense claim for period %s has been approved by %s.
 
-On behalf of Jawdat Management,
-Jawdat Expense Reimbursement Bot
-'''
-    mail_text = TEMPLATE % (claim["fullname"], \
-        convert_period_to_text(claim["period"]), session['fullname'])
-    send_mail(recipient_list, subject, mail_text)
+    On behalf of Jawdat Management,
+    Jawdat Expense Reimbursement Bot
+    '''
+        mail_text = TEMPLATE % (claim["fullname"], \
+            convert_period_to_text(claim["period"]), session['fullname'])
+        send_mail(recipient_list, subject, mail_text)
 
     return jsonify({"approved" : True})
 
@@ -473,27 +494,57 @@ def reject_claim_id(claim_id):
         {"status" : "rejected", "reject_msg" : request.form.get('reject_msg')}})
 
     claim = rch.find_one({"_id" : ObjectId(claim_id)})
+    sh = dbh.settings
+    settings_dict = sh.find_one()
 
-    # send mail
-    recipient_list = [
-        {"name": "Tedhi Achdiana", "address": "tedhi@jawdat.com"},
-        {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
-        {"name": claim["fullname"], "address": claim["username"]},
-    ]
-    subject = "[JBot] Expense Claim Rejection"
-    TEMPLATE = '''Dear %s,
+    if settings_dict["email_notifications"] == "on":
+        # send mail
+        recipient_list = [
+            {"name": "Tedhi Achdiana", "address": "tedhi@jawdat.com"},
+            {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
+            {"name": claim["fullname"], "address": claim["username"]},
+        ]
+        subject = "[JBot] Expense Claim Rejection"
+        TEMPLATE = '''Dear %s,
 
-Your expense claim for period %s has been rejected by %s.
-Message from %s: %s
+    Your expense claim for period %s has been rejected by %s.
+    Message from %s: %s
 
-On behalf of Jawdat Management,
-Jawdat Expense Reimbursement Bot
-'''
-    mail_text = TEMPLATE % (claim["fullname"], convert_period_to_text(claim["period"]), \
-        session['fullname'], session['fullname'], request.form.get('reject_msg'))
-    send_mail(recipient_list, subject, mail_text)
+    On behalf of Jawdat Management,
+    Jawdat Expense Reimbursement Bot
+    '''
+        mail_text = TEMPLATE % (claim["fullname"], convert_period_to_text(claim["period"]), \
+            session['fullname'], session['fullname'], request.form.get('reject_msg'))
+        send_mail(recipient_list, subject, mail_text)
 
     return jsonify({"rejected" : True})
+
+
+@app.route('/medical_summary')
+@logged_in
+def medical_summary():
+    eh = dbh.employees
+    rch = dbh.reimburse_claims
+
+    year = datetime.now().year
+    emp_list = list(eh.find())
+    emp_medical_expense = {}
+    year = date.today().year
+
+    for emp in emp_list:
+        claim_list = rch.find({"username" : emp["username"],
+            "status" : "approved",
+            "expense_list.category" : "medical"})
+        total_expense = 0
+        for claim in claim_list:
+            for exp in claim["expense_list"]:
+                if exp["category"] == "medical":
+                    total_expense += exp["cost"]
+        emp_medical_expense[emp["username"]] = total_expense
+
+    return render_template('medical-summary.htm.j2', fullname=session['fullname'],
+        username=session['username'], profpic=session['profpic'], roles=session['roles'],
+        emp_list=emp_list, emp_medical_expense=emp_medical_expense, year=year)
 
 @app.route('/list_costcenter')
 @logged_in
@@ -552,5 +603,28 @@ def close_costcenter(cc_id):
     cch.update_one({"_id" : ObjectId(cc_id)},
         {"$set" : {"costcenter_status" : "closed"}})
     return jsonify({"closed" : True})
+
+
+@app.route('/basic_settings', methods=['GET', 'POST'])
+@logged_in
+def basic_settings():
+    sh = dbh.settings
+    email_notifications = ""
+
+    if request.method == "POST":
+        f = request.form
+        if f.get("email-notifications"):
+            email_notifications = "on"
+        else:
+            email_notifications = "off"
+
+        sh.update_one({}, {"$set" : {"email_notifications" : email_notifications}})
+
+    settings_dict = sh.find_one()
+
+    return render_template('basic-settings.htm.j2', fullname=session['fullname'],
+        username=session['username'], profpic=session['profpic'], roles=session['roles'],
+        settings_dict=settings_dict)
+
 
 app.run(debug=True, host="0.0.0.0", port=5000, threaded=True)

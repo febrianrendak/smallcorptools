@@ -82,6 +82,8 @@
                       {% if "admin" in roles or "manager" in roles or "accounting" in roles: %}
                       <li><a href="{{ url_for('list_all_claim') }}">List All Claim</a>
                       </li>
+                      <li><a href="{{ url_for('medical_summary') }}">Medical Summary</a>
+                      </li>
                       {% endif %}
                     </ul>
                   </li>
@@ -94,6 +96,17 @@
                       <li><a href="{{ url_for('list_costcenter') }}">List Cost Center</a>
                       </li>
                       <li><a href="{{ url_for('create_costcenter') }}">Create Cost Center</a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+                {% endif %}
+
+                {% if "admin" in roles: %}
+                <ul class="nav side-menu">
+                  <li><a><i class="fa fa-wrench"></i> Settings <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="{{ url_for('basic_settings') }}">Basic Settings</a>
                       </li>
                     </ul>
                   </li>
