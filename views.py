@@ -264,7 +264,6 @@ def confirm_claim():
     claim["fullname"] = f["employee-name"]
     claim["period"] = f["expense-period"]
     claim["approved_by"] = supervisor["username"]
-    claim["status"] = "presubmitted"
     claim["expense_list"] = expense_list
     if f["cash-advance"]:
         claim["cash_advance"] = int(strip_curr(f["cash-advance"]))
@@ -273,7 +272,7 @@ def confirm_claim():
     claim["subtotal"] = subtotal
     claim["total"] = claim["subtotal"] - claim["cash_advance"]
 
-    rch.insert_one(claim)
+    session["tempclaim"] = claim
 
     return render_template('confirm-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'],
@@ -288,31 +287,31 @@ def submit_claim():
     sh = dbh.settings
     settings_dict = sh.find_one()
 
-    username = f["employee-email"]
-    fullname = f["employee-name"]
-    period = f["period-normalized"]
-    date_submitted = datetime.now()
+    claim = session["tempclaim"]
+    del session["tempclaim"]
+    claim["status"] = "submitted"
+    claim["date_submitted"] = datetime.now()
 
-    rch.update_one({"username" : username, "period" : period,
-        "status" : "presubmitted"}, {"$set" : 
-        {"status" : "submitted", "date_submitted" : date_submitted}})
+    rch.insert_one(claim)
 
     if settings_dict["email_notifications"] == "on":
         # send mail to accounting and the claimer
         recipient_list = [
             {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
-            {"name": fullname, "address": username},
+            {"name": claim["fullname"], "address": claim["username"]},
         ]
         subject = "[JBot] Expense Claim Submission"
         TEMPLATE = '''Dear %s,
 
 %s has submitted an expense claim for period %s.
+Total claim amount is %s.
 Please verify the expense claim.
 
 On behalf of the claimer,
 Jawdat Expense Reimbursement Bot
 '''
-        mail_text = TEMPLATE % ("Afilia Ratna", fullname, convert_period_to_text(period))
+        mail_text = TEMPLATE % ("Afilia Ratna", claim["fullname"],
+            convert_period_to_text(claim["period"]), format_currency(claim["total"]))
         send_mail(recipient_list, subject, mail_text)
     
     return redirect(url_for('list_claim'))
@@ -362,13 +361,7 @@ def generate_claim_report(claim_id):
 @logged_in
 def cancel_claim():
     f = request.form
-    rch = dbh.reimburse_claims
-
-    username = f["employee-email"]
-    period = f["period-normalized"]
-
-    rch.delete_many({"username" : username,
-        "period" : period, "status" : "presubmitted"})
+    del session["tempclaim"]
 
     return redirect(url_for('create_claim'))
 
@@ -376,7 +369,7 @@ def cancel_claim():
 @logged_in
 def list_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"username" : session["username"], "status" : {"$ne" : "presubmitted"}})
+    claim_list = rch.find({"username" : session["username"]})
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
@@ -385,7 +378,7 @@ def list_claim():
 @logged_in
 def list_all_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"status" : {"$ne" : "presubmitted"}})
+    claim_list = rch.find()
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
