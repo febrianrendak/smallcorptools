@@ -173,7 +173,7 @@ def login():
             session['profpic'] = user.get('profpic')
 
             next = request.args.get('next')
-            return redirect(next or url_for('main'))
+            return redirect(next or url_for('list_claim'))
         else:
             return render_template('login.htm.j2', err=True,
                 msg="Username and password do not match")
