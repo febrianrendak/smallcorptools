@@ -39,7 +39,7 @@
                       <tbody>
                         {% for claim in claim_list: %}
                         <tr id="row{{ claim["_id"] }}">
-                          <td >{% if claim["date_submitted"]: %}{{ claim["date_submitted"].strftime("%d/%m/%y") }}{% endif %}</td>
+                          <td >{{ claim["date_submitted"].strftime("%d/%m/%y") }}</td>
                           <td >{{ claim["fullname"] }}</td>
                           <td>{{ convert_period_to_text(claim["period"]) }}</td>
                           <td>{{ format_currency(claim["total"]) }}</td>

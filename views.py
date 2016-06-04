@@ -126,9 +126,8 @@ def convert_period_to_text(per_str):
         first_year = "20%s" % per_str[2:]
     second_year = "20%s" % per_str[2:]
     
-    return "21 %s %s - 20 %s %s" % (prev_month_dict[per_str[:2]], \
+    return "21 %s %s - 20 %s %s" % (prev_month_dict[per_str[:2]],
         first_year, month_dict[per_str[:2]], second_year)
-
 
 def format_currency(amount):
     return "Rp %s,00" % format(amount, ',d').replace(',', '.')
@@ -377,7 +376,7 @@ def cancel_claim():
 @logged_in
 def list_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"username" : session["username"]})
+    claim_list = rch.find({"username" : session["username"], "$ne" : {"status" : "presubmitted"}})
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
@@ -386,7 +385,7 @@ def list_claim():
 @logged_in
 def list_all_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find()
+    claim_list = rch.find({"$ne" : {"status" : "presubmitted"}})
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
