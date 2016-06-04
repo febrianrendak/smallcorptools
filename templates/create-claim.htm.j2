@@ -17,7 +17,7 @@
                 </div>
                 <div class="x_content">
                   <br />
-                  <form data-parsley-validate class="form-horizontal form-label-left" action="{{ url_for('confirm_claim') }}" method="POST">
+                  <form data-parsley-validate class="form-horizontal form-label-left" id="form-claim" action="{{ url_for('confirm_claim') }}" method="POST">
                     <input type="hidden" name="employee-email" value="{{ username }}">
 
                     <div class="form-group">
@@ -170,6 +170,9 @@
 <!-- jquery-maskmoney -->
 <script type="text/javascript" src="{{ url_for('static', filename='vendors/jquery-maskmoney/jquery.maskMoney.min.js') }}"></script>
 
+<!-- Parsley -->
+<script type="text/javascript" src="{{ url_for('static', filename='vendors/parsleyjs/dist/parsley.min.js') }}"></script>
+
 <script>
 $(document).ready(function() {
     var expenseIndex = 0;
@@ -233,6 +236,28 @@ $('input.date').daterangepicker({
 $(function() {
   $('.currency').maskMoney();
 });
+
+$(document).ready(function() {
+  $.listen('parsley:field:validate', function() {
+    validateFront();
+  });
+  $('#form-claim .btn-success').on('click', function() {
+    $('#form-claim').parsley().validate();
+    validateFront();
+  });
+  var validateFront = function() {
+    if (true === $('#form-claim').parsley().isValid()) {
+      $('.bs-callout-info').removeClass('hidden');
+      $('.bs-callout-warning').addClass('hidden');
+    } else {
+      $('.bs-callout-info').addClass('hidden');
+      $('.bs-callout-warning').removeClass('hidden');
+    }
+  };
+});
+try {
+  hljs.initHighlightingOnLoad();
+} catch (err) {}
 
 </script>
 
