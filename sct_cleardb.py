@@ -9,3 +9,5 @@ dbh = client.jawdat_internal
 #drop if collections exists
 dbh.drop_collection("employees")
 dbh.drop_collection("reimburse_claims")
+dbh.drop_collection("resetpass")
+dbh.drop_collection("settings")

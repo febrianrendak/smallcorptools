@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # by: Mohammad Riftadi <riftadi@jawdat.com>
 
-import hashlib, json, os
+import hashlib, json, os, random, string
 from bson.objectid import ObjectId
-from datetime import date, datetime
-from flask import Flask, url_for, redirect, request, session, render_template, jsonify
+from datetime import date, datetime, timedelta
+from flask import Flask, abort, url_for, redirect, request, session, render_template, jsonify
 # from flask_weasyprint import HTML, render_pdf
 from functools import wraps
 from pymongo import MongoClient
@@ -175,7 +175,7 @@ def login():
             next = request.args.get('next')
             return redirect(next or url_for('main'))
         else:
-            return render_template('login.htm.j2',
+            return render_template('login.htm.j2', err=True,
                 msg="Username and password do not match")
 
     return render_template('login.htm.j2')
@@ -222,11 +222,11 @@ def create_claim():
         if qr.count() == 0:
             periodlist.append(p)
 
-    cclist = list(cch.find())
+    cclist = list(cch.find({"costcenter_status" : "active"}))
 
     return render_template('create-claim.htm.j2', fullname=session['fullname'],
-        username=session['username'], profpic=session['profpic'], roles=session['roles'],
-        empdetail=employee, supdetail=supervisor,
+        username=session['username'], profpic=session['profpic'],
+        roles=session['roles'], empdetail=employee, supdetail=supervisor,
         periodlist=periodlist, cclist=cclist)
 
 @app.route('/confirm_claim', methods=['POST'])
@@ -428,14 +428,16 @@ def verify_claim_id(claim_id):
         subject = "[JBot] Expense Claim Verified"
         TEMPLATE = '''Dear %s,
 
-    %s's expense claim for period %s has been verified by %s.
-    Please approve the expense claim.
+%s's expense claim for period %s has been verified by %s.
+Total claim amount is %s.
+Please approve the expense claim.
 
-    On behalf of the claimer,
-    Jawdat Expense Reimbursement Bot
-    '''
+On behalf of the claimer,
+Jawdat Expense Reimbursement Bot
+'''
         mail_text = TEMPLATE % ("Tedhi Achdiana", claim["fullname"], \
-            convert_period_to_text(claim["period"]), session['fullname'])
+            convert_period_to_text(claim["period"]), session['fullname'], \
+            format_currency(claim["total"]))
         send_mail(recipient_list, subject, mail_text)
 
     return jsonify({"verified" : True})
@@ -472,16 +474,64 @@ def approve_claim_id(claim_id):
         subject = "[JBot] Expense Claim Approved"
         TEMPLATE = '''Dear %s,
 
-    Your expense claim for period %s has been approved by %s.
+Your expense claim for period %s has been approved by %s.
+Total claim amount is %s.
 
-    On behalf of Jawdat Management,
-    Jawdat Expense Reimbursement Bot
-    '''
+On behalf of Jawdat Management,
+Jawdat Expense Reimbursement Bot
+'''
         mail_text = TEMPLATE % (claim["fullname"], \
-            convert_period_to_text(claim["period"]), session['fullname'])
+            convert_period_to_text(claim["period"]), session['fullname'], \
+            format_currency(claim["total"]))
         send_mail(recipient_list, subject, mail_text)
 
     return jsonify({"approved" : True})
+
+
+@app.route('/pay_claim')
+@logged_in
+def pay_claim():
+    rch = dbh.reimburse_claims
+    claim_list = rch.find({"status" : "approved"})
+
+    return render_template('pay-claim.htm.j2', fullname=session['fullname'],
+        username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
+
+@app.route('/pay_claim/<claim_id>')
+@logged_in
+def pay_claim_id(claim_id):
+    # check if admin
+    rch = dbh.reimburse_claims
+    date_paid = datetime.now()
+    res = rch.update_one({"_id" : ObjectId(claim_id)}, {"$set" :
+        {"status" : "paid", "payment_date" : date_paid}})
+    sh = dbh.settings
+    settings_dict = sh.find_one()
+
+    claim = rch.find_one({"_id" : ObjectId(claim_id)})
+
+    if settings_dict["email_notifications"] == "on":
+        # send mail
+        recipient_list = [
+            {"name": "Tedhi Achdiana", "address": "tedhi@jawdat.com"},
+            {"name": "Afilia Ratna", "address": "afilia@jawdat.com"},
+            {"name": claim["fullname"], "address": claim["username"]},
+        ]
+        subject = "[JBot] Expense Claim Paid"
+        TEMPLATE = '''Dear %s,
+
+Your expense claim for period %s has been paid by %s.
+Total amount paid is %s.
+
+On behalf of Jawdat Management,
+Jawdat Expense Reimbursement Bot
+'''
+        mail_text = TEMPLATE % (claim["fullname"], \
+            convert_period_to_text(claim["period"]), session['fullname'], \
+            format_currency(claim["total"]))
+        send_mail(recipient_list, subject, mail_text)
+
+    return jsonify({"paid" : True})
 
 @app.route('/reject_claim/<claim_id>', methods=['POST'])
 @logged_in
@@ -507,11 +557,11 @@ def reject_claim_id(claim_id):
         subject = "[JBot] Expense Claim Rejection"
         TEMPLATE = '''Dear %s,
 
-    Your expense claim for period %s has been rejected by %s.
-    Message from %s: %s
+Your expense claim for period %s has been rejected by %s.
+Message from %s: %s
 
-    On behalf of Jawdat Management,
-    Jawdat Expense Reimbursement Bot
+On behalf of Jawdat Management,
+Jawdat Expense Reimbursement Bot
     '''
         mail_text = TEMPLATE % (claim["fullname"], convert_period_to_text(claim["period"]), \
             session['fullname'], session['fullname'], request.form.get('reject_msg'))
@@ -556,7 +606,7 @@ def list_costcenter():
     cc_total_expense = {}
 
     for cc in cc_list:
-        claim_list = rch.find({"status" : "approved",
+        claim_list = rch.find({"$or" : [{"status" : "approved"}, {"status" : "paid"}],
             "expense_list.costcenter" : cc["costcenter_id"]})
         total_expense = 0
         for claim in claim_list:
@@ -581,6 +631,7 @@ def create_costcenter():
         user_input["costcenter_id"] = f.get("costcenter-id")
         user_input["costcenter_name"] = f.get("costcenter-name")
         user_input["costcenter_budget"] = int(strip_curr(f.get("costcenter-budget")))
+        user_input["costcenter_category"] = f.get("costcenter-category")
         user_input["costcenter_status"] = f.get("costcenter-status")
 
         cc = cch.find_one({"costcenter_id" : user_input["costcenter_id"]})
@@ -604,7 +655,6 @@ def close_costcenter(cc_id):
         {"$set" : {"costcenter_status" : "closed"}})
     return jsonify({"closed" : True})
 
-
 @app.route('/basic_settings', methods=['GET', 'POST'])
 @logged_in
 def basic_settings():
@@ -626,5 +676,83 @@ def basic_settings():
         username=session['username'], profpic=session['profpic'], roles=session['roles'],
         settings_dict=settings_dict)
 
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == "POST":
+        f = request.form
+        username = f.get("user-email")
+
+        eh = dbh.employees
+        emp = eh.find_one({"username" : username})
+        if emp:
+            reset_url = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(80))
+            now = datetime.now()
+            next15minutes = now + timedelta(minutes = 15)
+
+            rph = dbh.resetpass
+            rph.insert_one({"username" : username, "reset_url" : reset_url,
+                "valid_until" : next15minutes, "used" : False})
+
+            goto_url =  "%srpext/%s" % (request.url_root, reset_url)
+
+            # send mail
+            recipient_list = [
+                {"name": emp["fullname"], "address": emp["username"]},
+            ]
+            subject = "[JBot] Reset Password"
+            TEMPLATE = '''Dear %s,
+
+Please reset your password here:
+
+%s
+
+The URL above is only valid for the next 15 minutes.
+
+Bip bip bep bop,
+Jawdat Expense Reimbursement Bot
+'''
+            mail_text = TEMPLATE % (emp["fullname"], goto_url)
+            send_mail(recipient_list, subject, mail_text)
+
+            return render_template('reset-password.htm.j2',
+                msg="Proceed to your e-mail inbox", redirect=url_for('login'))
+        else:
+            return render_template('reset-password.htm.j2', err=True,
+                msg="Username is not found")
+
+    return render_template('reset-password.htm.j2')
+
+@app.route('/rpext/<reset_url>', methods=['GET', 'POST'])
+def rpext(reset_url):
+    if request.method == "POST":
+        f = request.form
+        new_password = f.get("new-password")
+        confirm_new_password = f.get("confirm-new-password")
+
+        if new_password == confirm_new_password:
+            rph = dbh.resetpass
+            now = datetime.now()
+            reset = rph.find_one({"reset_url" : reset_url, "valid_until" : {"$gt": now}})
+
+            eh = dbh.employees
+            emp = eh.update_one({"username" : reset["username"]},
+                {"$set" : {"secret" : hashlib.md5(new_password).hexdigest()}})
+
+            rph.delete_one({"reset_url" : reset_url})
+
+            return render_template('create-new-password.htm.j2',
+                msg="Password is changed", redirect=url_for('login'))
+        else:
+            return render_template('create-new-password.htm.j2',
+                err=True, msg="Passwords do not match!")
+
+    rph = dbh.resetpass
+    now = datetime.now()
+    reset = rph.find_one({"reset_url" : reset_url, "valid_until" : {"$gt": now}})
+
+    if reset:
+        return render_template('create-new-password.htm.j2')
+    else:
+        abort(401)
 
 app.run(debug=True, host="0.0.0.0", port=5000, threaded=True)

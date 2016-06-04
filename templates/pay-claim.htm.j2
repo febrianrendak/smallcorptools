@@ -9,7 +9,7 @@
 
           <div class="page-title">
             <div class="title_left">
-              <h3>My Claim</h3>
+              <h3>Claim Payment</h3>
             </div>
           </div>
           <div class="clearfix"></div>
@@ -30,9 +30,8 @@
                           <th>Name</th>
                           <th>Period</th>
                           <th>Total</th>
-                          <th>Detail</th>
                           <th>Status</th>
-                          <th>Note</th>
+                          <th>Detail</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -43,23 +42,12 @@
                           <td >{{ claim["fullname"] }}</td>
                           <td>{{ convert_period_to_text(claim["period"]) }}</td>
                           <td>{{ format_currency(claim["total"]) }}</td>
+                          <td class="td-status">{{ claim["status"].capitalize() }}</td>
                           <td>
                             <button class="btn btn-xs btn-secondary btn-show-detail" data-claimid="{{ claim["_id"] }}">Show</button>
                           </td>
-                          <td >{{ claim["status"].capitalize() }}</td>
                           <td>
-                          {% if claim["status"] == "approved": %}
-                            Approved on {{ claim["approval_date"].strftime("%d/%m/%y") }}
-                          {% elif claim["status"] == "paid": %}
-                            Paid on {{ claim["payment_date"].strftime("%d/%m/%y") }}
-                          {% elif claim["status"] == "rejected": %}
-                            {{ claim["reject_msg"] }}
-                          {% else: %}
-                            -
-                          {% endif %}
-                          </td>
-                          <td>
-                            <button class="btn btn-xs btn-danger btn-cancel-claim" {% if claim["status"] == "approved" or claim["status"] == "paid" %}disabled="disabled" {% endif %}data-toggle="modal" data-target=".modal-confirm-cancel" data-claimid="{{ claim["_id"] }}">Cancel</button>
+                            <button class="btn btn-xs btn-success btn-pay-claim" data-toggle="modal" data-target=".modal-confirm-pay" data-claimid="{{ claim["_id"] }}">Pay</button>
                           </td>
                         </tr>
                         {% endfor %}
@@ -76,21 +64,21 @@
           </div>
 
           <!-- Small modal -->
-          <div class="modal fade modal-confirm-cancel" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal fade modal-confirm-pay" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-sm">
               <div class="modal-content">
 
                 <div class="modal-header">
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span>
                   </button>
-                  <h4 class="modal-title">Claim Cancellation</h4>
+                  <h4 class="modal-title">Claim Payment</h4>
                 </div>
                 <div class="modal-body">
                   <p>Are you sure?</p>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-danger btn-sm btn-confirm-cancel">Cancel</button>
                   <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary btn-sm btn-confirm-pay">Confirm</button>
                 </div>
 
               </div>
@@ -150,22 +138,25 @@ $('.btn-show-detail').unbind().on('click', function(e) {
   });
 });
 
-$('.btn-cancel-claim').unbind().on('click', function(e) {
+$('.btn-pay-claim').unbind().on('click', function(e) {
   e.preventDefault();
   e.stopPropagation();
+  $('.modal-confirm-pay').modal('show');
   var claim_id = $(this).data('claimid');
-  $('.modal-confirm-cancel').modal('show');
-  $('.btn-confirm-cancel').unbind().on('click', function(e) {
+  $('.btn-confirm-pay').unbind().on('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
     $.ajax({
-      url: '/delete_claim/' + claim_id,
+      url: '/pay_claim/' + claim_id,
       method: 'GET',
       success: function(response) {
-        $('#row' + claim_id).remove();
+        // change status and disable button
+        $('#row' + claim_id).find(".td-status").html("Paid");
+        $('#row' + claim_id).find(".btn-pay-claim").attr("disabled", true);
+
         new PNotify({
           title: 'Success',
-          text: 'Claim is cancelled',
+          text: 'Claim ID ' + claim_id + ' is paid',
           type: 'success',
           styling: 'bootstrap3'
         });
@@ -179,7 +170,7 @@ $('.btn-cancel-claim').unbind().on('click', function(e) {
         });
       },
       complete: function() {
-        $('.modal-confirm-cancel').modal('hide');
+        $('.modal-confirm-pay').modal('hide');
       }
     });
   });

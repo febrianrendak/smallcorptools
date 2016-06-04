@@ -179,6 +179,7 @@ $('.btn-verify-claim').unbind().on('click', function(e) {
       success: function(response) {
         // change status and disable button
         $('#row' + claim_id).find(".td-status").html("Verified");
+        $('#row' + claim_id).find(".btn-reject-claim").attr("disabled", true);
         $('#row' + claim_id).find(".btn-verify-claim").attr("disabled", true);
         new PNotify({
           title: 'Success',
