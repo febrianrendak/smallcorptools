@@ -376,7 +376,7 @@ def cancel_claim():
 @logged_in
 def list_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"username" : session["username"], "$ne" : {"status" : "presubmitted"}})
+    claim_list = rch.find({"username" : session["username"], "status" : {"$ne" : "presubmitted"}})
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
@@ -385,7 +385,7 @@ def list_claim():
 @logged_in
 def list_all_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"$ne" : {"status" : "presubmitted"}})
+    claim_list = rch.find({"status" : {"$ne" : "presubmitted"}})
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
