@@ -575,7 +575,7 @@ def medical_summary():
 
     for emp in emp_list:
         claim_list = rch.find({"username" : emp["username"],
-            "status" : "approved",
+            "$or" : [{"status" : "approved"}, {"status" : "paid"}],
             "expense_list.category" : "medical"})
         total_expense = 0
         for claim in claim_list:
