@@ -18,7 +18,7 @@ eh = dbh.employees
 ne = [
       {
           "username" : "tedhi@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "001",
           "roles" : ["manager", "director"],
@@ -31,7 +31,7 @@ ne = [
 
       {
           "username" : "himawan@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "002",
           "roles" : ["manager", "director"],
@@ -44,7 +44,7 @@ ne = [
 
       {
           "username" : "afilia@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "004",
           "roles" : ["accounting", "hrd"],
@@ -57,7 +57,7 @@ ne = [
 
       {
           "username" : "bagus@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "005",
           "roles" : ["staff"],
@@ -69,7 +69,7 @@ ne = [
 
       {
           "username" : "ary@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "010",
           "roles" : ["staff"],
@@ -81,7 +81,7 @@ ne = [
 
       {
           "username" : "riftadi@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "012",
           "roles" : ["staff", "admin"],
@@ -94,7 +94,7 @@ ne = [
 
       {
           "username" : "ericson.pasaribu@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "016",
           "roles" : ["staff"],
@@ -107,7 +107,7 @@ ne = [
 
       {
           "username" : "nugroho@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "020",
           "roles" : ["staff"],
@@ -119,7 +119,7 @@ ne = [
 
       {
           "username" : "panji.harimurti@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "023",
           "roles" : ["staff"],
@@ -131,7 +131,7 @@ ne = [
 
       {
           "username" : "munandar.rahman@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "031",
           "roles" : ["staff"],
@@ -143,7 +143,7 @@ ne = [
 
       {
           "username" : "danav.pratama@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "032",
           "roles" : ["staff"],
@@ -155,7 +155,7 @@ ne = [
 
       {
           "username" : "tri.karamoy@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "024",
           "roles" : ["staff"],
@@ -167,20 +167,20 @@ ne = [
       },
 
       {
-          "username" : "firza.agusta@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "username" : "firza.wiratama@jawdat.com",
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "025",
           "roles" : ["staff"],
-          "fullname" : "Firza Agusta",
-          "position" : "Product Manager",
+          "fullname" : "Firza Agusta Wiratama",
+          "position" : "SDN Engineer",
           "division" : "engineering",
           "supervisor" : "tedhi@jawdat.com",
       },
 
       {
           "username" : "lisa.anggrainy@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "026",
           "roles" : ["staff"],
@@ -192,7 +192,7 @@ ne = [
 
       {
           "username" : "faisal.sonjaya@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "027",
           "roles" : ["staff"],
@@ -204,7 +204,7 @@ ne = [
 
       {
           "username" : "doni.siringoringo@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "028",
           "roles" : ["staff"],
@@ -216,7 +216,7 @@ ne = [
 
       {
           "username" : "dimas.nugroho@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "029",
           "roles" : ["staff"],
@@ -228,13 +228,37 @@ ne = [
 
       {
           "username" : "fikri.rahman@jawdat.com",
-          "secret" : hashlib.md5("jawdat123").hexdigest(),
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "030",
           "roles" : ["staff"],
           "fullname" : "M. Fikri Ali Rahman",
           "position" : "UI/UX Developer",
           "division" : "engineering",
+          "supervisor" : "tedhi@jawdat.com",
+      },
+
+      {
+          "username" : "febrian.rendak@jawdat.com",
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
+          "first_login" : True,
+          "jawdat_id" : "033",
+          "roles" : ["staff"],
+          "fullname" : "Febrian Rendak",
+          "position" : "SDN Engineer",
+          "division" : "engineering",
+          "supervisor" : "tedhi@jawdat.com",
+      },
+
+      {
+          "username" : "raisha.nizami@jawdat.com",
+          "secret" : hashlib.md5("J@wdat12345").hexdigest(),
+          "first_login" : True,
+          "jawdat_id" : "034",
+          "roles" : ["staff"],
+          "fullname" : "Raisha Syifa Nizami",
+          "position" : "Asst. PM",
+          "division" : "external",
           "supervisor" : "tedhi@jawdat.com",
       },
 ]
