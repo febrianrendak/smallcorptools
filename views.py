@@ -4,8 +4,8 @@
 import hashlib, json, os, random, string
 from bson.objectid import ObjectId
 from datetime import date, datetime, timedelta
-from flask import Flask, abort, url_for, redirect, request, session, render_template, jsonify
-# from flask_weasyprint import HTML, render_pdf
+from flask import Flask, abort, make_response, url_for, redirect, request, session, render_template, jsonify
+from fpdf import FPDF, HTMLMixin
 from functools import wraps
 from pymongo import MongoClient
 from Queue import Queue
@@ -20,6 +20,9 @@ dbh = client.jawdat_internal
 
 app = Flask(__name__)
 app.secret_key = 'Bgh3wtiA*(EG78wegBYt36BFYE7qg3fEFGG&31knj5e'
+
+class MyFPDF(FPDF, HTMLMixin):
+    pass
 
 def logged_in(f):
     @wraps(f)
@@ -332,31 +335,6 @@ def view_detail_claim(claim_id):
 
     return render_template('view-detail-claim.htm.j2', claim=claim, ccnamemap=ccnamemap)
 
-@app.route('/generate_claim_report/<claim_id>')
-@logged_in
-def generate_claim_report(claim_id):
-    eh = dbh.employees
-    cch = dbh.costcenters
-    rch = dbh.reimburse_claims
-    ccnamemap = {}
-
-    employee = eh.find_one({"username" : session["username"]})
-    supervisor = eh.find_one({"username" : employee["supervisor"]})
-    costcenters = cch.find()
-
-    for cc in costcenters:
-        ccnamemap[cc["costcenter_id"]] = cc["costcenter_name"]
-
-    claim = rch.find_one({"_id" : ObjectId(claim_id)})
-
-    html = render_template('claim-printed-form.htm.j2', fullname=session['fullname'],
-        username=session['username'], profpic=session['profpic'], roles=session['roles'],
-        empdetail=employee, supdetail=supervisor,
-        claim=claim, ccnamemap=ccnamemap)
-
-    return html
-    # return render_pdf(HTML(string=html))
-
 @app.route('/cancel_claim', methods=['POST'])
 @logged_in
 def cancel_claim():
@@ -389,6 +367,39 @@ def delete_claim(claim_id):
     rch = dbh.reimburse_claims
     rch.delete_one({"_id" : ObjectId(claim_id)})
     return jsonify({"deleted" : True})
+
+@app.route('/print_claim/<claim_id>')
+@logged_in
+def print_claim(claim_id):
+    eh = dbh.employees
+    cch = dbh.costcenters
+    rch = dbh.reimburse_claims
+    ccnamemap = {}
+
+    claim = dict(rch.find_one({"_id" : ObjectId(claim_id)}))
+    employee = dict(eh.find_one({"username" : claim["username"]}))
+    supervisor = dict(eh.find_one({"username" : employee["supervisor"]}))
+    costcenters = cch.find()
+
+    for cc in costcenters:
+        ccnamemap[cc["costcenter_id"]] = cc["costcenter_name"]
+
+    html = render_template('print-claim.htm.j2', empdetail=employee,
+        supdetail=supervisor, claim=claim, ccnamemap=ccnamemap)
+
+    pdf = MyFPDF()
+
+    pdf.add_page()
+    pdf.write_html(html)
+    pdf_filename = 'claim-%s-%s.pdf' % \
+        (claim["username"].split('@')[0], claim['period'])
+    binary_pdf = pdf.output(pdf_filename, 'S')
+
+    response = make_response(binary_pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = \
+        'inline; filename=%s' % pdf_filename
+    return response
 
 @app.route('/verify_claim')
 @logged_in

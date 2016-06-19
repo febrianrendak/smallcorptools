@@ -1,0 +1,99 @@
+<img src="static/images/jawdat-logo.png" width="150" align="right">
+<br>
+<br>
+<h1>Expense Reimbursement Form</h1>
+<br>
+
+<table border="0" align="left" width="50%">
+  <thead>
+    <tr>
+      <th width="50%"></th>
+      <th width="50%"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Employee Name :</td>
+      <td>{{ empdetail['fullname'] }}</td>
+    </tr>
+    <tr>
+      <td>Employee Number :</td>
+      <td>{{ empdetail['jawdat_id'] }}</td>
+    </tr>
+    <tr>
+      <td>Supervisor Name :</td>
+      <td>{{ supdetail['fullname'] }}</td>
+    </tr>
+    <tr>
+      <td>Expense Period :</td>
+      <td>{{ convert_period_to_text(claim['period']) }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<table border="0" align="center" width="100%">
+  <thead>
+    <tr>
+      <th width="15%">Date</th>
+      <th width="20%">Description</th>
+      <th width="15%">Category</th>
+      <th width="30%">Cost Center</th>
+      <th width="20%">Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for exp in claim["expense_list"]: %}
+    <tr>
+      <td>{{ exp["date"].strftime("%d/%m/%y") }}</td>
+      <td>{{ exp["description"] }}</td>
+      <td>{{ exp["category"].capitalize() }}</td>
+      <td>{{ ccnamemap[exp["costcenter"]] }}</td>
+      <td>{{ format_currency(exp["cost"]) }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td><b>Subtotal</b></td>
+      <td><b>{{ format_currency(claim["subtotal"]) }}</b></td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td>Advanced Cash</td>
+      <td>({{ format_currency(claim["cash_advance"]) }})</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td><b>Total</b></td>
+      <td><b>{{ format_currency(claim["total"]) }}</b></td>
+    </tr>
+  </tbody>
+</table>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<hr>
+<span>Employee Signature                                   Date</span>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<hr>
+<span>Supervisor Signature                                 Date</span>
+
+<br>
+<br>
+<br>
+<span>Note: Please attach receipt for every expense.</span>

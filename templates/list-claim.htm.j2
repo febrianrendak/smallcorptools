@@ -45,6 +45,7 @@
                           <td>{{ format_currency(claim["total"]) }}</td>
                           <td>
                             <button class="btn btn-xs btn-secondary btn-show-detail" data-claimid="{{ claim["_id"] }}">Show</button>
+                            <button class="btn btn-xs btn-secondary btn-print-detail" data-claimid="{{ claim["_id"] }}">Print</button>
                           </td>
                           <td >{{ claim["status"].capitalize() }}</td>
                           <td>
@@ -148,6 +149,15 @@ $('.btn-show-detail').unbind().on('click', function(e) {
     complete: function() {
     }
   });
+});
+
+$('.btn-print-detail').unbind().on('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  var claim_id = $(this).data('claimid');
+  var url = '/print_claim/' + claim_id;
+  window.open(url, '_blank');
 });
 
 $('.btn-cancel-claim').unbind().on('click', function(e) {
