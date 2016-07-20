@@ -203,6 +203,7 @@ $(document).ready(function() {
             $('input.date').daterangepicker({
                 format: 'DD/MM/YYYY',
                 singleDatePicker: true,
+                minDate: moment().subtract(3, 'month').startOf('month'),
                 calender_style: "picker_4"
             }, function(start, end, label) {
                 // console.log(start.toISOString(), end.toISOString(), label);
