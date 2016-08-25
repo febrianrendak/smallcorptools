@@ -191,7 +191,7 @@ ne = [
       },
 
       {
-          "username" : "faisal.sonjaya@jawdat.com",
+          "username" : "faisal.sanjaya@jawdat.com",
           "secret" : hashlib.md5("J@wdat12345").hexdigest(),
           "first_login" : True,
           "jawdat_id" : "027",
