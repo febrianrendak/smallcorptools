@@ -227,6 +227,7 @@ def create_claim():
             period = "%02d%02d" % (today.month + 1, today.year % 100)
         
     periodlist = []
+    # check if period is already exist for this user
     for p in [prev2_period, prev_period, period]:
         qr = rch.find({"$and" : [{"username" : session["username"],
             "period" : p, "status" : {"$ne" : "rejected"}}]})
