@@ -208,17 +208,26 @@ def create_claim():
         period = "%02d%02d" % (today.month, today.year % 100)
         if today.month == 1:
             prev_period = "%02d%02d" % (12, (today.year % 100) - 1)
+            prev2_period = "%02d%02d" % (11, (today.year % 100) - 1)
         else:
             prev_period = "%02d%02d" % (today.month - 1, today.year % 100)
+            if today.month == 2:
+                prev2_period = "%02d%02d" % (12, (today.year % 100) - 1)
+            else:
+                prev2_period = "%02d%02d" % (today.month - 2, today.year % 100)
     else:
         prev_period = "%02d%02d" % (today.month, today.year % 100)
+        if today.month == 1:
+            prev2_period = "%02d%02d" % (12, (today.year % 100) - 1)
+        else:
+            prev2_period = "%02d%02d" % (today.month - 1, today.year % 100)
         if today.month == 12:
             period = "%02d%02d" % (1, (today.year % 100) + 1)
         else:
             period = "%02d%02d" % (today.month + 1, today.year % 100)
         
     periodlist = []
-    for p in [prev_period, period]:
+    for p in [prev2_period, prev_period, period]:
         qr = rch.find({"$and" : [{"username" : session["username"],
             "period" : p, "status" : {"$ne" : "rejected"}}]})
         if qr.count() == 0:
