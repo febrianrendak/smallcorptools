@@ -357,7 +357,7 @@ def cancel_claim():
 @logged_in
 def list_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"username" : session["username"]}).sort('date', DESCENDING)
+    claim_list = rch.find({"username" : session["username"]}).sort('date_submitted', DESCENDING)
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
@@ -366,7 +366,7 @@ def list_claim():
 @logged_in
 def list_all_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find().sort('date', DESCENDING)
+    claim_list = rch.find().sort('date_submitted', DESCENDING)
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
@@ -415,7 +415,7 @@ def print_claim(claim_id):
 @logged_in
 def verify_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"status" : "submitted"}).sort('date', DESCENDING)
+    claim_list = rch.find({"status" : "submitted"}).sort('date_submitted', DESCENDING)
 
     return render_template('verify-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
@@ -459,7 +459,7 @@ Jawdat Expense Reimbursement Bot
 @logged_in
 def approve_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"status" : "verified"}).sort('date', DESCENDING)
+    claim_list = rch.find({"status" : "verified"}).sort('date_submitted', DESCENDING)
 
     return render_template('approve-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
@@ -505,7 +505,7 @@ Jawdat Expense Reimbursement Bot
 @logged_in
 def pay_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"status" : "approved"}).sort('date', DESCENDING)
+    claim_list = rch.find({"status" : "approved"}).sort('date_submitted', DESCENDING)
 
     return render_template('pay-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
