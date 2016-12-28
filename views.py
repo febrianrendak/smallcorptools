@@ -94,8 +94,6 @@ def convert_to_datetime(date_ind_string):
     return datetime(year, month, day)
 
 def convert_period_to_text(per_str):
-    print '--------------############------'
-    print per_str
     prev_month_dict = {
         "02" : "Januari",
         "03" : "Februari",
@@ -125,7 +123,7 @@ def convert_period_to_text(per_str):
         "12" : "Desember"
     }
 
-    if per_str[:2] == "01":
+    if per_str[2:] == "01":
         first_year = "20%d" % int(per_str[2:])-1
     else:
         first_year = "20%s" % per_str[2:]
