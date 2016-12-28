@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta
 from flask import Flask, abort, make_response, url_for, redirect, request, session, render_template, jsonify
 from fpdf import FPDF, HTMLMixin
 from functools import wraps
-from pymongo import MongoClient
+from pymongo import MongoClient, pymongo
 from Queue import Queue
 from threading import Thread
 import email, imaplib, smtplib
