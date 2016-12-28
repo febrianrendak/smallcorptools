@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta
 from flask import Flask, abort, make_response, url_for, redirect, request, session, render_template, jsonify
 from fpdf import FPDF, HTMLMixin
 from functools import wraps
-from pymongo import MongoClient, pymongo
+from pymongo import MongoClient, ASCENDING, DESCENDING
 from Queue import Queue
 from threading import Thread
 import email, imaplib, smtplib
@@ -357,7 +357,7 @@ def cancel_claim():
 @logged_in
 def list_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"username" : session["username"]}).sort('date', pymongo.DESCENDING)
+    claim_list = rch.find({"username" : session["username"]}).sort('date', DESCENDING)
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
@@ -366,7 +366,7 @@ def list_claim():
 @logged_in
 def list_all_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find().sort('date', pymongo.DESCENDING)
+    claim_list = rch.find().sort('date', DESCENDING)
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
