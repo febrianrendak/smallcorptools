@@ -357,7 +357,7 @@ def cancel_claim():
 @logged_in
 def list_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find({"username" : session["username"]})
+    claim_list = rch.find({"username" : session["username"]}).sort('date', pymongo.DESCENDING)
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
@@ -366,7 +366,7 @@ def list_claim():
 @logged_in
 def list_all_claim():
     rch = dbh.reimburse_claims
-    claim_list = rch.find()
+    claim_list = rch.find().sort('date', pymongo.DESCENDING)
 
     return render_template('list-claim.htm.j2', fullname=session['fullname'],
         username=session['username'], profpic=session['profpic'], roles=session['roles'], claim_list=claim_list)
