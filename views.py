@@ -94,6 +94,7 @@ def convert_to_datetime(date_ind_string):
     return datetime(year, month, day)
 
 def convert_period_to_text(per_str):
+    print per_str
     prev_month_dict = {
         "02" : "Januari",
         "03" : "Februari",
