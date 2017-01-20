@@ -123,8 +123,8 @@ def convert_period_to_text(per_str):
         "12" : "Desember"
     }
 
-    if per_str[2:] == "01":
-        first_year = "20%d" % int(per_str[2:])-1
+    if per_str[:2] == "01":
+        first_year = "20%s" % str(int(per_str[2:])-1)
     else:
         first_year = "20%s" % per_str[2:]
     second_year = "20%s" % per_str[2:]
