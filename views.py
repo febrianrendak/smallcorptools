@@ -16,9 +16,6 @@ from email.mime.text import MIMEText
 from email.mime.message import MIMEMessage
 
 from OpenSSL import SSL
-context = SSL.Context(SSL.SSLv23_METHOD)
-context.use_privatekey_file('/home/centos/smallcorptools/ssl_cert/key.pem')
-context.use_certificate_file('/home/centos/smallcorptools/ssl_cert/cert.pem')
 
 client = MongoClient('mongodb://localhost:27017/')
 dbh = client.jawdat_internal
@@ -773,4 +770,5 @@ def rpext(reset_url):
     else:
         abort(401)
 
-app.run(debug=True, host="0.0.0.0", port=5000, threaded=True, ssl_context=context)
+app.run(debug=True, host="0.0.0.0", port=5000, threaded=True, ssl_context=('/home/centos/smallcorptools/ssl_cert/cert.pem', '/home/centos/smallcorptools/ssl_cert/cert.pem')
+)
